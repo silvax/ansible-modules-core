@@ -248,7 +248,7 @@ def get_properties(autoscaling_group):
         properties['instance_facts'] = instance_facts
     properties['load_balancers'] = autoscaling_group.load_balancers
 
-    if hasattr(autoscaling_group, "tags"):
+    if getattr(autoscaling_group, "tags", None):
         properties['tags'] = dict((t.key, t.value) for t in autoscaling_group.tags)
 
     return properties
@@ -274,8 +274,10 @@ def create_autoscaling_group(connection, module):
         region, ec2_url, aws_connect_params = get_aws_connection_info(module)
         try:
             ec2_connection = connect_to_aws(boto.ec2, region, **aws_connect_params)
-        except boto.exception.NoAuthHandlerFound, e:
+        except (boto.exception.NoAuthHandlerFound, StandardError), e:
             module.fail_json(msg=str(e))
+    elif vpc_zone_identifier:
+        vpc_zone_identifier = ','.join(vpc_zone_identifier)
 
     asg_tags = []
     for tag in set_tags:
@@ -324,6 +326,8 @@ def create_autoscaling_group(connection, module):
         for attr in ASG_ATTRIBUTES:
             if module.params.get(attr):
                 module_attr = module.params.get(attr)
+                if attr == 'vpc_zone_identifier':
+                    module_attr = ','.join(module_attr)
                 group_attr = getattr(as_group, attr)
                 # we do this because AWS and the module may return the same list
                 # sorted differently
@@ -555,7 +559,7 @@ def main():
             min_size=dict(type='int'),
             max_size=dict(type='int'),
             desired_capacity=dict(type='int'),
-            vpc_zone_identifier=dict(type='str'),
+            vpc_zone_identifier=dict(type='list'),
             replace_batch_size=dict(type='int', default=1),
             replace_all_instances=dict(type='bool', default=False),
             replace_instances=dict(type='list', default=[]),

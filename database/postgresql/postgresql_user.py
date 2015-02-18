@@ -79,7 +79,7 @@ options:
     required: false
     default: localhost
   login_unix_socket:
-    description
+    description:
       - Path to a Unix domain socket for local connections
     required: false
     default: null
@@ -162,8 +162,8 @@ else:
 _flags = ('SUPERUSER', 'CREATEROLE', 'CREATEUSER', 'CREATEDB', 'INHERIT', 'LOGIN', 'REPLICATION')
 VALID_FLAGS = frozenset(itertools.chain(_flags, ('NO%s' % f for f in _flags)))
 
-VALID_PRIVS = dict(table=frozenset(('SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER', 'ALL')),
-        database=frozenset(('CREATE', 'CONNECT', 'TEMPORARY', 'TEMP', 'ALL')),
+VALID_PRIVS = dict(table=frozenset(('SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE', 'REFERENCES', 'TRIGGER', 'ALL', 'USAGE')),
+        database=frozenset(('CREATE', 'CONNECT', 'TEMPORARY', 'TEMP', 'ALL', 'USAGE')),
         )
 
 class InvalidFlagsError(Exception):

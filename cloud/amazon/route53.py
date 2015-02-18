@@ -113,6 +113,7 @@ EXAMPLES = '''
       command: delete
       zone: foo.com
       record: "{{ rec.set.record }}"
+      ttl: "{{ rec.set.ttl }}"
       type: "{{ rec.set.type }}"
       value: "{{ rec.set.value }}"
 
@@ -162,7 +163,7 @@ def commit(changes, retry_interval):
             code = code.split("</Code>")[0]
             if code != 'PriorRequestNotComplete' or retry < 0:
                 raise e
-            time.sleep(retry_interval)
+            time.sleep(float(retry_interval))
 
 def main():
     argument_spec = ec2_argument_spec()
@@ -180,9 +181,9 @@ def main():
     module = AnsibleModule(argument_spec=argument_spec)
 
     command_in            = module.params.get('command')
-    zone_in               = module.params.get('zone')
+    zone_in               = module.params.get('zone').lower()
     ttl_in                = module.params.get('ttl')
-    record_in             = module.params.get('record')
+    record_in             = module.params.get('record').lower()
     type_in               = module.params.get('type')
     value_in              = module.params.get('value')
     retry_interval_in     = module.params.get('retry_interval')

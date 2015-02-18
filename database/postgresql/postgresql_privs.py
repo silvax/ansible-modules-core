@@ -100,7 +100,7 @@ options:
     required: no
     default: 5432
   unix_socket:
-    description
+    description:
       - Path to a Unix domain socket for local connections.
       - 'Alias: I(login_unix_socket)'
     required: false
@@ -238,7 +238,7 @@ except ImportError:
 
 VALID_PRIVS = frozenset(('SELECT', 'INSERT', 'UPDATE', 'DELETE', 'TRUNCATE',
                          'REFERENCES', 'TRIGGER', 'CREATE', 'CONNECT',
-                         'TEMPORARY', 'TEMP', 'EXECUTE', 'USAGE', 'ALL'))
+                         'TEMPORARY', 'TEMP', 'EXECUTE', 'USAGE', 'ALL', 'USAGE'))
 class Error(Exception):
     pass
 
@@ -474,10 +474,13 @@ class Connection(object):
         if obj_type == 'group':
             set_what = ','.join(pg_quote_identifier(i, 'role') for i in obj_ids)
         else:
+            # function types are already quoted above
+            if obj_type != 'function':
+                obj_ids = [pg_quote_identifier(i, 'table') for i in obj_ids]
             # Note: obj_type has been checked against a set of string literals
             # and privs was escaped when it was parsed
             set_what = '%s ON %s %s' % (','.join(privs), obj_type,
-                                        ','.join(pg_quote_identifier(i, 'table') for i in obj_ids))
+                                        ','.join(obj_ids))
 
         # for_whom: SQL-fragment specifying for whom to set the above
         if roles == 'PUBLIC':

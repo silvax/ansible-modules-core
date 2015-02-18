@@ -45,7 +45,7 @@ options:
     required: false
     default: localhost
   login_unix_socket:
-    description
+    description:
       - Path to a Unix domain socket for local connections
     required: false
     default: null
@@ -275,7 +275,7 @@ def main():
         kw["host"] = module.params["login_unix_socket"]
 
     try:
-        db_connection = psycopg2.connect(database="template1", **kw)
+        db_connection = psycopg2.connect(database="postgres", **kw)
         # Enable autocommit so we can create databases
         if psycopg2.__version__ >= '2.4.2':
             db_connection.autocommit = True
@@ -311,6 +311,9 @@ def main():
                 module.fail_json(msg=str(e))
     except NotSupportedError, e:
         module.fail_json(msg=str(e))
+    except SystemExit:
+        # Avoid catching this on Python 2.4 
+        raise
     except Exception, e:
         module.fail_json(msg="Database query failed: %s" % e)
 
